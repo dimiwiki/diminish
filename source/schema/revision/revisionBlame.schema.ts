@@ -4,6 +4,7 @@ import generalSchema from '@schema/general.schema';
 import documentSchema from '@schema/document/document.schema';
 import revisionSchema from './revision.schema';
 
+// revisionBlameSchema
 export default {
 	documentId: documentSchema['id'],
 	revisionId: revisionSchema['id'],

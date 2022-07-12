@@ -4,6 +4,7 @@ import documentSchema from '@schema/document/document.schema';
 import generalSchema from '@schema/general.schema';
 import userSchema from '@schema/user/user.schema';
 
+// threadSchema
 export default {
 	id: generalSchema['unsginedInteger32'],
 	documentId: documentSchema['id'],

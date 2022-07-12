@@ -1,15 +1,16 @@
-import schema, { JSONSchema } from 'fluent-json-schema';
+import { JSONSchema } from 'fluent-json-schema';
 import { AccessControl } from '@prisma/client';
 import documentSchema from '@schema/document/document.schema';
 import generalSchema from '@schema/general.schema';
 
+// accessControlSchema
 export default {
 	id: generalSchema['unsginedInteger32'],
 	documentId: documentSchema['id'],
-	type: schema.integer().minimum(0).maximum(9), // TODO: make type
-	conditionType: schema.integer().minimum(0).maximum(9), // TODO: make condition type
-	condition: schema.string().minLength(1).maxLength(256),
-	message: schema.string().minLength(1).maxLength(256),
+	type: generalSchema['integerWithPrecision1'], // TODO: make type
+	conditionType: generalSchema['integerWithPrecision1'], // TODO: make condition type
+	condition: generalSchema['stringWithLength256'],
+	message: generalSchema['stringWithLength256'],
 	expiry: generalSchema['unsginedInteger32'],
-	createdAt: schema.string().format('date-time') // XXX: since cratedAt will treated in server-side only, it will not used for checking input
+	createdAt: generalSchema['dateTime'] // XXX: since cratedAt will treated in server-side only, it will not used for checking input
 } as Record<keyof AccessControl, JSONSchema>;
