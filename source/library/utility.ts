@@ -1,7 +1,9 @@
 import { createHash, createHmac, pbkdf2 } from 'crypto';
 import schema, { JSONSchema, ObjectSchema, StringSchema } from 'fluent-json-schema';
 import { createTransport, Transporter } from 'nodemailer';
-import { PBKDF_ITERATION } from '@library/environment';
+import { DEFAULT_PAGE_SIZE, PBKDF_ITERATION } from '@library/environment';
+import { PageQuery, RecursiveRecord } from './type';
+import { BadRequest } from '@library/httpError';
 
 export function getEncryptedPassword(password: string, createdAt: Date): Promise<string> {
 	return new Promise<string>(function (resolve: (value: string) => void, reject: (reason?: any) => void): void {
@@ -83,15 +85,30 @@ export function sendMail(options: {
 	});
 }
 
-export function getObjectSchema<T extends Record<string, JSONSchema | T>>(object: T, options?: { allowAdditionalProperties?: boolean }): ObjectSchema {
+export function getObjectSchema<T extends string>(object: RecursiveRecord<T, JSONSchema>, options?: { allowAdditionalProperties?: boolean }): ObjectSchema {
 	const allowAdditionalProperties: boolean = typeof(options) === 'object' && typeof(options['allowAdditionalProperties']) === 'boolean' && options['allowAdditionalProperties'];
-	const schmeaNames: readonly string[] = Object.keys(object);
+	const schmeaNames: readonly T[] = Object.keys(object) as T[];
 	
 	let _schema: ObjectSchema = schema.object().additionalProperties(allowAdditionalProperties);
 
 	for(let i: number = 0; i < schmeaNames['length']; i++) {
-		_schema = _schema.prop(schmeaNames[i], object[schmeaNames[i]].hasOwnProperty('isFluentJSONSchema') ? object[schmeaNames[i]] as JSONSchema : getObjectSchema(object[schmeaNames[i]] as T, { allowAdditionalProperties: allowAdditionalProperties }));
+		_schema = _schema.prop(schmeaNames[i], object[schmeaNames[i]].hasOwnProperty('isFluentJSONSchema') ? object[schmeaNames[i]] as JSONSchema : getObjectSchema(object[schmeaNames[i]] as RecursiveRecord<T, JSONSchema>, { allowAdditionalProperties: allowAdditionalProperties }));
 	}
 
 	return _schema.readOnly(true);
+}
+
+export function getPagenation<T extends string>(rowCount: number, orderCriterion: T, query: PageQuery): { take: number; skip: number; order: Record<T, 'desc' | 'asc'> } {
+	const pageSize: number = query['page[size]'] || DEFAULT_PAGE_SIZE;
+	const pageIndex: number = query['page[index]'] || 0;
+
+	if(pageIndex < Math.ceil(rowCount / pageSize)) {
+		return {
+			skip: pageSize * pageIndex,
+			take: pageSize,
+			order: { [orderCriterion]: query['page[order]'] === 'desc' ? 'desc' : 'asc' } as Record<T, 'desc' | 'asc'>
+		}
+	} else {
+		throw new BadRequest('Query[\'page[index]\'] should be smaller than page size');
+	}
 }
