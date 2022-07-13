@@ -1,6 +1,7 @@
-import schema, { JSONSchema } from 'fluent-json-schema';
-import { User } from '@prisma/client';
+import schema from 'fluent-json-schema';
 import generalSchema from '@schema/general.schema';
+import { Schema } from '@library/type';
+import { User } from '@prisma/client';
 
 // userSchema
 export default {
@@ -11,4 +12,4 @@ export default {
 	permission: generalSchema['integerWithPrecision1'], // TODO: make permission
 	verificationKey: generalSchema['sha512'],
 	createdAt: generalSchema['dateTime'] // XXX: since cratedAt will treated in server-side only, it will not used for checking input
-} as Record<keyof User, JSONSchema>;
+} as Schema<keyof User>;

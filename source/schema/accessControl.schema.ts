@@ -1,7 +1,7 @@
-import { JSONSchema } from 'fluent-json-schema';
-import { AccessControl } from '@prisma/client';
 import documentSchema from '@schema/document/document.schema';
 import generalSchema from '@schema/general.schema';
+import { Schema } from '@library/type';
+import { AccessControl } from '@prisma/client';
 
 // accessControlSchema
 export default {
@@ -13,4 +13,4 @@ export default {
 	message: generalSchema['stringWithLength256'],
 	expiry: generalSchema['unsginedInteger32'],
 	createdAt: generalSchema['dateTime'] // XXX: since cratedAt will treated in server-side only, it will not used for checking input
-} as Record<keyof AccessControl, JSONSchema>;
+} as Schema<keyof AccessControl>;

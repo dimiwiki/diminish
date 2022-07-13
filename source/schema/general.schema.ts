@@ -1,4 +1,5 @@
-import schema, { JSONSchema } from 'fluent-json-schema';
+import schema from 'fluent-json-schema';
+import { Schema } from '@library/type';
 
 // generalSchema
 export default {
@@ -7,4 +8,4 @@ export default {
 	integerWithPrecision1: schema.integer().minimum(0).maximum(9),
 	stringWithLength256: schema.string().minLength(1).maxLength(256),
 	dateTime: schema.string().format('date-time')
-} as Record<'unsginedInteger32' | 'sha512' | 'integerWithPrecision1' | 'stringWithLength256' | 'dateTime', JSONSchema>;
+} as Schema<'unsginedInteger32' | 'sha512' | 'integerWithPrecision1' | 'stringWithLength256' | 'dateTime'>;
