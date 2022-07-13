@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node -r tsconfig-paths/register distribution/application.js",
-    "dev": "ts-node-dev --rs --watch source/**/*.ts -r tsconfig-paths/register source/application.ts"
+    "dev": "ts-node-dev --rs --watch source/**/*.ts -r tsconfig-paths/register source/application.ts",
+    "prisma": "prisma"
   },
   "dependencies": {
     "@prisma/client": "^4.0.0",
