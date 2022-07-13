@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
-	previewFeatures = ["fullTextSearch", "fullTextIndex"]
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -9,193 +9,179 @@ datasource db {
 }
 
 model AccessControl {
-	@@map("access_control")
-
-  id             Int       @id @default(autoincrement()) @db.UnsignedInt
-  documentId     Int?      @map("document_id") @db.UnsignedInt
-  type           Int       @db.UnsignedTinyInt
-  conditionType  Int       @map("condition_type") @db.UnsignedTinyInt
-  condition      String    @db.VarChar(39)
-  message        String    @db.VarChar(256)
-  expiry         Int       @db.UnsignedInt
-  createdAt      DateTime  @map("created_at") @db.DateTime(0)
-  document       Document? @relation(fields: [documentId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (access_control.document_id, document.id)")
+  id            Int       @id @default(autoincrement()) @db.UnsignedInt
+  documentId    Int?      @map("document_id") @db.UnsignedInt
+  type          Int       @db.UnsignedTinyInt
+  conditionType Int       @map("condition_type") @db.UnsignedTinyInt
+  condition     String    @db.VarChar(39)
+  message       String    @db.VarChar(256)
+  expiry        Int       @db.UnsignedInt
+  createdAt     DateTime  @map("created_at") @db.DateTime(0)
+  document      Document? @relation(fields: [documentId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (access_control.document_id, document.id)")
 
   @@unique([documentId, type, conditionType, condition], map: "UNIQUE INDEX (document_id, type, condition_type, condition)")
+  @@map("access_control")
 }
 
 model Category {
-	@@map("category")
-
   id    Int    @id @default(autoincrement()) @db.UnsignedInt
   title String @unique(map: "UNIQUE INDEX (title)") @db.VarChar(256)
+
+  @@map("category")
 }
 
 model Document {
-	@@map("document")
+  id              Int              @id @default(autoincrement()) @db.UnsignedInt
+  title           String           @unique(map: "UNIQUE INDEX (title)") @db.VarChar(512)
+  plain           String?          @db.MediumText
+  content         String?          @db.MediumText
+  accessControls  AccessControl[]
+  documentStars   DocumentStar[]
+  revisions       Revision[]
+  revisionBlames  RevisionBlame[]
+  revisionRequest RevisionRequest?
+  threads         Thread[]
 
-  id               Int               @id @default(autoincrement()) @db.UnsignedInt
-  title            String            @unique(map: "UNIQUE INDEX (title)") @db.VarChar(512)
-  plain            String?           @db.VarChar(0) // @db.MediumText
-  content          String?           @db.VarChar(0) // @db.MediumText
-  accessControls   AccessControl[]
-  documentStars    DocumentStar[]
-  revisions        Revision[]
-  revisionBlames   RevisionBlame[]
-  revisionRequest  RevisionRequest?
-  threads          Thread[]
-
-  @@index([content], map: "FULLTEXT INDEX (content)")
-  @@index([plain], map: "FULLTEXT INDEX (plain)")
-  @@index([title], map: "FULLTEXT INDEX (title)")
+  @@map("document")
 }
 
 model DocumentStar {
-	@@map("document_star")
-
-  documentId  Int      @map("document_id") @db.UnsignedInt
-  userId      Int      @map("user_id") @db.UnsignedInt
-  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (document_star.document_id, document.id)")
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (document_star.user_id, user.id)")
+  documentId Int      @map("document_id") @db.UnsignedInt
+  userId     Int      @map("user_id") @db.UnsignedInt
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (document_star.document_id, document.id)")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (document_star.user_id, user.id)")
 
   @@id([documentId, userId])
   @@index([userId], map: "FOREIGN KEY (document_star.user_id, user.id)")
+  @@map("document_star")
 }
 
 model Group {
-	@@map("group")
+  id         Int         @id @default(autoincrement()) @db.UnsignedInt
+  title      String      @unique(map: "UNIQUE INDEX (title)") @db.VarChar(256)
+  userGroups UserGroup[]
 
-  id         Int          @id @default(autoincrement()) @db.UnsignedInt
-  title      String       @unique(map: "UNIQUE INDEX (title)") @db.VarChar(256)
-  userGroups  UserGroup[]
+  @@map("group")
 }
 
 model Image {
-	@@map("image")
-
   id        String  @id @db.VarChar(128)
   title     String  @db.VarChar(512)
   extension Int     @db.UnsignedTinyInt
 
   @@unique([title, extension], map: "UNIQUE INDEX (title, extension)")
+  @@map("image")
 }
 
 model Revision {
-	@@map("revision")
-
-  id               Int                @db.UnsignedInt
-  documentId       Int                @map("document_id") @db.UnsignedInt
-  revisionId       Int?               @map("revision_id") @db.UnsignedInt
-  authorType       Int                @map("author_type") @db.UnsignedTinyInt
-  author           String             @db.VarChar(39)
-  content          Bytes?             @db.MediumBlob
+  id               Int               @db.UnsignedInt
+  documentId       Int               @map("document_id") @db.UnsignedInt
+  revisionId       Int?              @map("revision_id") @db.UnsignedInt
+  authorType       Int               @map("author_type") @db.UnsignedTinyInt
+  author           String            @db.VarChar(39)
+  content          Bytes?            @db.MediumBlob
   size             Int
-  comment          String             @db.VarChar(256)
-  createdAt        DateTime           @map("created_at") @default(now()) @db.DateTime(0)
-  document         Document           @relation(fields: [documentId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (revision.document_id, document.id)")
-  revision         Revision?          @relation("retoredRevision", fields: [documentId, revisionId], references: [documentId, id], onDelete: Cascade, map: "FOREIGN KEY (revision.revision_id, revision.id)")
-  revisions        Revision[]         @relation("retoredRevision") 
+  comment          String            @db.VarChar(256)
+  createdAt        DateTime          @default(now()) @map("created_at") @db.DateTime(0)
+  document         Document          @relation(fields: [documentId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (revision.document_id, document.id)")
+  revision         Revision?         @relation("retoredRevision", fields: [documentId, revisionId], references: [documentId, id], onDelete: Cascade, map: "FOREIGN KEY (revision.revision_id, revision.id)")
+  revisions        Revision[]        @relation("retoredRevision") 
   revisionBlames   RevisionBlame[]
   revisionRequest  RevisionRequest[]
 
   @@id([id, documentId])
   @@index([documentId], map: "FOREIGN KEY (revision.document_id, document.id)")
   @@index([revisionId], map: "FOREIGN KEY (revision.revision_id, revision.id)")
+  @@map("revision")
 }
 
 model RevisionBlame {
-	@@map("revision_blame")
-
-  documentId  Int      @map("document_id") @db.UnsignedInt
-  revisionId  Int      @map("revision_id") @db.UnsignedInt
-  line        Int      @db.UnsignedInt
-  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (revision_blame.document_id, document.id)")
-  revision    Revision @relation(fields: [documentId, revisionId], references: [documentId, id], onDelete: Cascade, map: "FOREIGN KEY (revision_blame.revision_id, revision.id)")
+  documentId Int      @map("document_id") @db.UnsignedInt
+  revisionId Int      @map("revision_id") @db.UnsignedInt
+  line       Int      @db.UnsignedInt
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (revision_blame.document_id, document.id)")
+  Revision   Revision @relation(fields: [documentId, revisionId], references: [documentId, id], onDelete: Cascade, map: "FOREIGN KEY (revision_blame.revision_id, revision.id)")
 
   @@id([revisionId, documentId])
   @@index([documentId], map: "FOREIGN KEY (revision_blame.document_id, document.id)")
+  @@map("revision_blame")
 }
 
 model RevisionRequest {
-	@@map("revision_request")
-
-  id          Int      @id @default(autoincrement()) @db.UnsignedInt
-  documentId  Int      @map("document_id") @unique(map: "UNIQUE INDEX(document_id, revision_id)") @db.UnsignedInt
-  revisionId  Int      @map("revision_id") @db.UnsignedInt
-  content     Bytes?   @db.MediumBlob
-  status      Int      @db.UnsignedTinyInt
-  createdAt   DateTime @map("created_at") @db.DateTime(0)
-  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (revision_request.document_id, document.id)")
-  revision    Revision @relation(fields: [documentId, revisionId], references: [documentId, id], onDelete: Cascade, map: "FOREIGN KEY (revision_request.revision_id, revision.id)")
+  id         Int      @id @default(autoincrement()) @db.UnsignedInt
+  documentId Int      @unique(map: "UNIQUE INDEX(document_id, revision_id)") @map("document_id") @db.UnsignedInt
+  revisionId Int      @map("revision_id") @db.UnsignedInt
+  content    Bytes?   @db.MediumBlob
+  status     Int      @db.UnsignedTinyInt
+  createdAt  DateTime @map("created_at") @db.DateTime(0)
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (revision_request.document_id, document.id)")
+  revision   Revision @relation(fields: [documentId, revisionId], references: [documentId, id], onDelete: Cascade, map: "FOREIGN KEY (revision_request.revision_id, revision.id)")
 
   @@index([revisionId], map: "FOREIGN KEY (revision_request.revision_id, revision.id)")
+  @@map("revision_request")
 }
 
 model Thread {
-	@@map("thread")
-
-  id             Int              @id @default(autoincrement()) @db.UnsignedInt
-  documentId     Int              @map("document_id") @db.UnsignedInt
-  userId         Int              @map("user_id") @db.UnsignedInt
-  title          String           @db.VarChar(512)
-  document       Document         @relation(fields: [documentId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (thread.document_id, document.id)")
-  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (thread.user_id, user.id)")
+  id             Int             @id @default(autoincrement()) @db.UnsignedInt
+  documentId     Int             @map("document_id") @db.UnsignedInt
+  userId         Int             @map("user_id") @db.UnsignedInt
+  title          String          @db.VarChar(512)
+  document       Document        @relation(fields: [documentId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (thread.document_id, document.id)")
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (thread.user_id, user.id)")
   threadComments ThreadComment[]
 
   @@unique([documentId, title], map: "UNIQUE INDEX (document_id, title)")
   @@index([userId], map: "FOREIGN KEY (thread.user_id, user.id)")
+  @@map("thread")
 }
 
 model ThreadComment {
-	@@map("thread_comment")
-
-  id         Int      @db.UnsignedInt
-  threadId   Int      @map("thread_id") @db.UnsignedInt
-  userId     Int      @map("user_id") @db.UnsignedInt
-  content    String   @db.Text
-  createdAt  DateTime @map("created_at") @default(now()) @db.DateTime(0)
-  thread     Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (thread_comment.thread_id, thread.id)")
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (thread_comment.user_id, user.id)")
+  id        Int      @db.UnsignedInt
+  threadId  Int      @map("thread_id") @db.UnsignedInt
+  userId    Int      @map("user_id") @db.UnsignedInt
+  content   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.DateTime(0)
+  thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (thread_comment.thread_id, thread.id)")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (thread_comment.user_id, user.id)")
 
   @@id([id, threadId])
   @@index([threadId], map: "FOREIGN KEY (thread_comment.thread_id, thread.id)")
   @@index([userId], map: "FOREIGN KEY (thread_comment.user_id, user.id)")
+  @@map("thread_comment")
 }
 
 model User {
-	@@map("user")
+  id              Int             @id @default(autoincrement()) @db.UnsignedInt
+  name            String          @unique(map: "UNIQUE INDEX (name)") @db.VarChar(32)
+  password        String          @db.VarChar(128)
+  email           String          @unique(map: "UNIQUE INDEX (email)") @db.VarChar(256)
+  permission      Int             @db.UnsignedTinyInt
+  verificationKey String          @map("verification_key") @unique(map: "UNIQUE INDEX (verification_key)") @db.VarChar(128)
+  createdAt       DateTime        @default(now()) @map("created_at") @db.DateTime(0)
+  documentStars   DocumentStar[]
+  threads         Thread[]
+  threadComments  ThreadComment[]
+  userGroups      UserGroup[]
 
-  id               Int              @id @default(autoincrement()) @db.UnsignedInt
-  name             String           @unique(map: "UNIQUE INDEX (name)") @db.VarChar(32)
-  password         String           @db.VarChar(128)
-  email            String           @unique(map: "UNIQUE INDEX (email)") @db.VarChar(256)
-  permission       Int              @db.UnsignedTinyInt
-  verificationKey  String           @map("verification_key") @db.VarChar(128)
-  createdAt        DateTime         @map("created_at") @default(now()) @db.DateTime(0)
-  documentStars    DocumentStar[]
-  threads          Thread[]
-  threadComments   ThreadComment[]
-  userGroups       UserGroup[]
+  @@map("user")
 }
 
 model UserConfig {
-	@@map("user_config")
-
-  userId  Int @map("user_id") @db.UnsignedInt
-  type    Int @db.UnsignedTinyInt
-  value   Int @db.UnsignedTinyInt
+  userId Int     @map("user_id") @db.UnsignedInt
+  type   Int     @db.UnsignedTinyInt
+  value  Int     @db.UnsignedTinyInt
 
   @@id([userId, type])
+  @@map("user_config")
 }
 
 model UserGroup {
-	@@map("user_group")
-
-  userId   Int   @map("user_id") @db.UnsignedInt
-  groupId  Int   @map("group_id") @db.UnsignedInt
-  user     User  @relation(fields: [userId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (user_group.user_id, user.id)")
-  group    Group @relation(fields: [groupId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (user_group.group_id, group.id)")
+  userId  Int   @map("user_id") @db.UnsignedInt
+  groupId Int   @map("group_id") @db.UnsignedInt
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (user_group.user_id, user.id)")
+  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade, map: "FOREIGN KEY (user_group.group_id, group.id)")
 
   @@id([userId, groupId])
   @@index([groupId], map: "FOREIGN KEY (user_group.group_id, group.id)")
+  @@map("user_group")
 }
