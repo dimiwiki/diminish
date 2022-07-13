@@ -75,8 +75,7 @@ application.addHook('onRequest', function (request: FastifyRequest, reply: Paylo
 	if(!request['is404']) {
 		request['user'] = {
 			id: '',
-			permission: 0,
-			rateLimit: DEFAULT_RATE_LIMIT * 60
+			permission: 0
 		};
 
 		redis.incrby('rateLimit:' + request['ip'], 1)
@@ -95,7 +94,6 @@ application.addHook('onRequest', function (request: FastifyRequest, reply: Paylo
 				if(jsonWebToken.isValid()) {
 					request['user']['id'] = jsonWebToken['payload']['uid'] as string;
 					request['user']['permission'] = jsonWebToken['payload']['per'];
-					request['user']['rateLimit'] = jsonWebToken['payload']['rat'];
 				} else {
 					request['id'] = 'error:value';
 				}
@@ -103,7 +101,7 @@ application.addHook('onRequest', function (request: FastifyRequest, reply: Paylo
 				request['id'] = 'error:type';
 			}
 
-			if(request['user']['rateLimit'] * 60 >= requestCount) {
+			if(8192 * request['user']['permission'] >= requestCount) { // TODO: configure rate limit
 				done();
 			} else {
 				reply.send(new TooManyRequests('Request per minute should not exeed rate limit'));
