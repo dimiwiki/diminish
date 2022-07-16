@@ -10,6 +10,8 @@ export default {
 	id: generalSchema['unsginedInteger32'],
 	documentId: documentSchema['id'],
 	revisionId: revisionSchema['id'],
+	authorType: generalSchema['integerWithPrecision1'], // TODO: make condition type
+	author: generalSchema['stringWithLength256'],
 	content: schema.string().pattern(/^[a-f0-9]+$/), // XXX: since content will treated in server-side only, it will not used for checking input
 	status: generalSchema['integerWithPrecision1'],
 	createdAt: generalSchema['dateTime'] // XXX: since cratedAt will treated in server-side only, it will not used for checking input

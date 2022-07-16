@@ -6,6 +6,7 @@ import { Document } from '@prisma/client';
 // documentSchema
 export default {
 	id: generalSchema['unsginedInteger32'],
+	type: generalSchema['integerWithPrecision1'],
 	title: schema.string().minLength(1).maxLength(512),
 	plain: schema.string().maxLength(16777215),
 	content: schema.string().maxLength(16777215)
