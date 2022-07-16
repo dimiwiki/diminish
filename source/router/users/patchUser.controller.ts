@@ -39,8 +39,10 @@ export default function (request: FastifyRequest<{ Params: Pick<User, 'id'>; Bod
 										if(encryptedPreviousPassword === user['password']) {
 											getEncryptedPassword(request['body']['password'] as string, user['createdAt'])
 											.then(function (encryptedPassword: string): void {
+												delete(request['body']['previousPassword']);
+												
 												request['body']['password'] = encryptedPassword;
-		
+												
 												resolve();
 												
 												return;
