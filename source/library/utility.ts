@@ -2,12 +2,11 @@ import { createHash, createHmac, pbkdf2 } from 'crypto';
 import schema, { JSONSchema, ObjectSchema, StringSchema } from 'fluent-json-schema';
 import { createTransport, Transporter } from 'nodemailer';
 import { DEFAULT_PAGE_SIZE, PBKDF_ITERATION } from '@library/environment';
-import { PageQuery, RecursiveRecord } from './type';
-import { BadRequest } from '@library/httpError';
+import { PageCondition, PageQuery, RecursiveRecord, RejectFunction, ResolveFunction } from '@library/type';
 
 export function getEncryptedPassword(password: string, createdAt: Date): Promise<string> {
-	return new Promise<string>(function (resolve: (value: string) => void, reject: (reason?: any) => void): void {
-		pbkdf2(password, createHash('sha256').update(String(createdAt.getTime() / 1000)).digest('hex'), PBKDF_ITERATION, 64, 'sha512', function (error: Error | null, derivedKey: Buffer): void {
+	return new Promise<string>(function (resolve: ResolveFunction<string>, reject: RejectFunction): void {
+		pbkdf2(password, createHash('sha256').update(String(Math.trunc(createdAt.getTime() / 1000))).digest('hex'), PBKDF_ITERATION, 64, 'sha512', function (error: Error | null, derivedKey: Buffer): void {
 			if(error === null) {
 				resolve(derivedKey.toString('hex'));
 			} else {
@@ -70,7 +69,7 @@ export function sendMail(options: {
 	title: string;
 	body: string;
 }): Promise<void> {
-	return new Promise<void>(function (resolve: (value: void) => void, reject: (reason?: any) => void): void {
+	return new Promise<void>(function (resolve: ResolveFunction, reject: RejectFunction): void {
 		transport.sendMail({
 			// @ts-expect-error
 			from: '디미위키 <' + transport['options']['auth']['user'] + '>',
@@ -98,17 +97,30 @@ export function getObjectSchema<T extends string>(object: RecursiveRecord<T, JSO
 	return _schema.readOnly(true);
 }
 
-export function getPagenation<T extends string>(rowCount: number, orderCriterion: T, query: PageQuery): { take: number; skip: number; order: Record<T, 'desc' | 'asc'> } {
+export function getPageCondition<T>(query: PageQuery, orderCriterion: keyof T): PageCondition<keyof T> {
 	const pageSize: number = query['page[size]'] || DEFAULT_PAGE_SIZE;
-	const pageIndex: number = query['page[index]'] || 0;
-
-	if(pageIndex < Math.ceil(rowCount / pageSize)) {
-		return {
-			skip: pageSize * pageIndex,
-			take: pageSize,
-			order: { [orderCriterion]: query['page[order]'] === 'desc' ? 'desc' : 'asc' } as Record<T, 'desc' | 'asc'>
-		}
-	} else {
-		throw new BadRequest('Query[\'page[index]\'] should be smaller than page size');
-	}
+	
+	return {
+		skip: pageSize * (query['page[index]'] || 0),
+		take: pageSize,
+		orderBy: { [orderCriterion]: query['page[order]'] !== 'asc' ? 'desc' : 'asc' } as PageCondition<keyof T>['orderBy']
+	};
 }
+
+export function getDuplicatedElement<T extends string>(comparer: Record<T, any>, targets: Record<T, any>[]): T | null {
+	const elements: T[] = Object.keys(comparer) as T[];
+
+	for(let i: number = 0; i < targets['length']; i++) {
+		for(let j: number = 0; j < elements['length']; j++) {
+			if(comparer[elements[j]] === targets[i][elements[j]]) {
+				return elements[j];
+			}
+		}
+	}
+
+	return null;
+}
+
+export function getSha512EncryptedText(text: string): string {
+	return createHash('sha512').update(text).digest('hex');
+} 

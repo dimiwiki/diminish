@@ -3,7 +3,6 @@ import { IncomingMessage, Server, ServerResponse } from 'http';
 import { Module } from '@library/framework';
 import { HttpError, HttpErrorInformation } from '@library/httpError';
 import { RouteGenericInterface } from 'fastify/types/route';
-import { ResolveFastifyRequestType } from 'fastify/types/type-provider';
 import { REQUIRED_ENVIRONMENT_VARIABLE_NAMES } from '@library/environment';
 import { ArraySchema, BooleanSchema, IntegerSchema, NumberSchema, ObjectSchema, S, StringSchema } from 'fluent-json-schema';
 
@@ -44,7 +43,6 @@ declare module 'fastify' {
 
 interface RouteOptions extends Omit<_RouteOptions, 'handler'> {
 	method: HTTPMethods;
-	//handler: RouteHandlerMethod<Server, IncomingMessage, ServerResponse, any, unknown, FastifySchema, FastifyTypeProvider, ResolveFastifyRequestType<FastifyTypeProvider, FastifySchema, any>, FastifyLoggerInstance>;
 	handler: RouteHandlerMethod<Server, IncomingMessage, ServerResponse, any, any, FastifySchema, FastifyTypeProvider, any, FastifyLoggerInstance>;
 }
 
@@ -65,3 +63,15 @@ export interface PageQuery {
 	'page[index]'?: number;
 	'page[order]'?: 'desc' | 'asc';
 }
+
+export interface PageCondition<T extends string | number | symbol> {
+	skip: number;
+	take: number;
+	orderBy: Record<T, 'desc' | 'asc'>;
+}
+
+export type ModelName = keyof (typeof import('@prisma/client')['Prisma'])['ModelName'];
+
+export type ResolveFunction<T = void> = (value: T | PromiseLike<T>) => void;
+
+export type RejectFunction = (reason?: any) => void;
