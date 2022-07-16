@@ -1,5 +1,5 @@
-import { DEFAULT_RATE_LIMIT, IS_DEVELOPMENT, PORT } from '@library/environment';
-import { fastify, FastifyError, FastifyInstance, PayloadReply, FastifyRequest, HTTPMethods, RouteOptions, FastifyReply } from 'fastify';
+import { IS_PRODUCTION_ENVIRONMENT, PORT } from '@library/environment';
+import { fastify, FastifyError, FastifyInstance, PayloadReply, FastifyRequest, HTTPMethods, RouteOptions, FastifyReply, HookHandlerDoneFunction } from 'fastify';
 import { MethodNotAllowed, NotFound, TooManyRequests } from '@library/httpError';
 import { RouterRegistry, Logger } from '@library/framework';
 import { JSONWebToken } from '@library/utility';
@@ -12,7 +12,7 @@ const application: FastifyInstance = fastify({
 	logger: new Logger()
 });
 
-application['log'].info('Configured as ' + (IS_DEVELOPMENT ? 'Development' : 'Production') + ' mode');
+application['log'].info('Configured as ' + (IS_PRODUCTION_ENVIRONMENT ? 'Production' : 'Development') + ' mode');
 
 const routerRegistry: RouterRegistry = new RouterRegistry();
 
@@ -61,7 +61,7 @@ application.setErrorHandler(function (error: FastifyError, request: FastifyReque
 		status: 'fail',
 		data: [Object.assign({
 			title: error['message']
-		}, IS_DEVELOPMENT && isStackAvailable ? { body: error['stack'] } : undefined)]
+		}, !IS_PRODUCTION_ENVIRONMENT && isStackAvailable ? { body: error['stack'] } : undefined)]
 	} : {
 		status: 'error',
 		code: error['statusCode'],
@@ -101,7 +101,7 @@ application.addHook('onRequest', function (request: FastifyRequest, reply: Paylo
 				request['id'] = 'error:type';
 			}
 
-			if(8192 * request['user']['permission'] >= requestCount) { // TODO: configure rate limit
+			if(8192 * (request['user']['permission'] + 1) >= requestCount) { // TODO: configure rate limit
 				done();
 			} else {
 				reply.send(new TooManyRequests('Request per minute should not exeed rate limit'));

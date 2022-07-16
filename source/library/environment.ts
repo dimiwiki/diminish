@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-export const REQUIRED_ENVIRONMENT_VARIABLE_NAMES = ['DATABASE_URL', 'CACHE_DATABASE_URL', 'EMAIL_USER', 'EMAIL_PASSWORD', 'JSON_WEB_TOKEN_SECRET', 'PORT', 'PASSWORD_BASED_KEY__ITERATION', 'DEFAULT_RATE_LIMIT', 'DEFAULT_PAGE_SIZE', 'PAGE_SIZE_LIMIT',] as const;
+export const REQUIRED_ENVIRONMENT_VARIABLE_NAMES = ['WIKI_NAME', 'DATABASE_URL', 'CACHE_DATABASE_URL', 'EMAIL_USER', 'EMAIL_PASSWORD', 'JSON_WEB_TOKEN_SECRET', 'PORT', 'PASSWORD_BASED_KEY_DERIVATION_FUNCTION_ITERATION', 'DEFAULT_RATE_LIMIT', 'DEFAULT_PAGE_SIZE', 'PAGE_SIZE_LIMIT',] as const;
 
 for(let i = 0; i < REQUIRED_ENVIRONMENT_VARIABLE_NAMES['length']; i++) {
 	if(typeof(process['env'][REQUIRED_ENVIRONMENT_VARIABLE_NAMES[i]]) === 'undefined') {
@@ -27,4 +27,4 @@ export const DEFAULT_PAGE_SIZE = Number.parseInt(process['env']['DEFAULT_PAGE_SI
 // @ts-expect-error
 export const PAGE_SIZE_LIMIT = Number.parseInt(process['env']['PAGE_SIZE_LIMIT']) as const;
 
-export const IS_DEVELOPMENT = __filename.endsWith('.ts') && process['env']['NODE_ENV'] === 'development' as const;
+export const IS_PRODUCTION_ENVIRONMENT = __filename.endsWith('.js') && process['env']['NODE_ENV'] === 'production' as const;

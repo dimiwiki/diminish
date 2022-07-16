@@ -1,3 +1,4 @@
+import schema from 'fluent-json-schema';
 import documentSchema from '@schema/document/document.schema';
 import generalSchema from '@schema/general.schema';
 import { Schema } from '@library/type';
@@ -10,6 +11,7 @@ export default {
 	type: generalSchema['integerWithPrecision1'], // TODO: make type
 	conditionType: generalSchema['integerWithPrecision1'], // TODO: make condition type
 	condition: generalSchema['stringWithLength256'],
+	isAllowed: schema.boolean(),
 	message: generalSchema['stringWithLength256'],
 	expiry: generalSchema['unsginedInteger32'],
 	createdAt: generalSchema['dateTime'] // XXX: since cratedAt will treated in server-side only, it will not used for checking input

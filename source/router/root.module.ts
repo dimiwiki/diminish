@@ -1,7 +1,9 @@
 import { Module } from '@library/framework';
+import documentsModule from './documents/documents.module';
 import getFaviconDotIcoController from './getFaviconDotIco.controller';
 import getRobotsDotTxtController from './getRobotsDotTxt.controller';
 import getRootController from './getRoot.controller';
+import usersModule from './users/users.module';
 
 export default (new Module({
 	routers: [{
@@ -17,4 +19,5 @@ export default (new Module({
 		url: 'favicon.ico',
 		handler: getFaviconDotIcoController
 	}],
+	modules: [documentsModule, usersModule]
 }));
