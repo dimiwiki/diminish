@@ -4,7 +4,7 @@ import { Module } from '@library/framework';
 import { HttpError, HttpErrorInformation } from '@library/httpError';
 import { RouteGenericInterface } from 'fastify/types/route';
 import { REQUIRED_ENVIRONMENT_VARIABLE_NAMES } from '@library/environment';
-import { ArraySchema, BooleanSchema, IntegerSchema, NumberSchema, ObjectSchema, S, StringSchema } from 'fluent-json-schema';
+import { ArraySchema, BooleanSchema, IntegerSchema, NumberSchema, ObjectSchema, StringSchema } from 'fluent-json-schema';
 
 declare global {
 	namespace NodeJS {
