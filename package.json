@@ -1,14 +1,24 @@
 {
-  "name": "api.dimi.wiki",
+  "name": "diminish",
   "version": "1.0.0",
+  "description": "Self-development wiki backend for dimi.wiki",
   "main": "distribution/application.js",
-  "private": true,
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node -r tsconfig-paths/register distribution/application.js",
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register source/application.ts",
     "prisma": "prisma"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dimiwiki/diminish.git"
+  },
+  "author": "H2Owater425 <h2o@h2owr.xyz> (https://h2o.cx/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dimiwiki/diminish/issues"
+  },
+  "homepage": "https://github.com/dimiwiki/diminish#readme",
   "dependencies": {
     "@prisma/client": "^4.1.0",
     "diff": "^5.1.0",
