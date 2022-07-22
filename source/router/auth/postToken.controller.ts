@@ -8,7 +8,7 @@ export default function (request: FastifyRequest<{ Body: { refreshToken: string;
 	try {
 		const userId: number = JSON.parse(Buffer.from(request['body']['refreshToken'].split('.')[1], 'base64url').toString())['uid'];
 
-		prisma.user.findFirst({
+		prisma['user'].findFirst({
 			where: { id: userId },
 			select: {
 				password: true,

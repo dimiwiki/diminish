@@ -3,7 +3,7 @@ import { User } from '@prisma/client';
 import { PayloadReply, FastifyRequest } from 'fastify';
 
 export default function (request: FastifyRequest<{ Querystring: Pick<User, 'verificationKey'> }>, reply: PayloadReply): void {
-	prisma.user.findFirst({
+	prisma['user'].findFirst({
 		select: {
 			id: true,
 			name: true
@@ -12,7 +12,7 @@ export default function (request: FastifyRequest<{ Querystring: Pick<User, 'veri
 	})
 	.then(function (user: Pick<User, 'id' | 'name'> | null): void {
 		if(user !== null) {
-			prisma.document.create({
+			prisma['document'].create({
 				select: null,
 				data: {
 					title: user['name'],

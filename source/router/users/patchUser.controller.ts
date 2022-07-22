@@ -6,7 +6,7 @@ import { User } from '@prisma/client';
 import { PayloadReply, FastifyRequest } from 'fastify';
 
 export default function (request: FastifyRequest<{ Params: Pick<User, 'id'>; Body: Partial<Pick<User, 'name' | 'password' | 'email' | 'permission'> & { previousPassword: User['password'] }> }>, reply: PayloadReply): void {
-	prisma.user.findMany({
+	prisma['user'].findMany({
 		select: {
 			name: true,
 			email: true
@@ -28,7 +28,7 @@ export default function (request: FastifyRequest<{ Params: Pick<User, 'id'>; Bod
 				if(typeof(request['body']['password']) === typeof(request['body']['previousPassword'])) {
 					(new Promise<void>(function (resolve: ResolveFunction<void>, reject: RejectFunction): void {
 						if(typeof(request['body']['password']) === 'string') {
-							prisma.user.findFirst({
+							prisma['user'].findFirst({
 								select: { password: true, createdAt: true },
 								where: request['params']
 							})
@@ -42,7 +42,7 @@ export default function (request: FastifyRequest<{ Params: Pick<User, 'id'>; Bod
 												delete(request['body']['previousPassword']);
 												
 												request['body']['password'] = encryptedPassword;
-												
+
 												resolve();
 												
 												return;
@@ -69,7 +69,7 @@ export default function (request: FastifyRequest<{ Params: Pick<User, 'id'>; Bod
 						return;
 					}))
 					.then(function (): void {
-						prisma.user.update({
+						prisma['user'].update({
 							select: null,
 							data: request['body'],
 							where: request['params']

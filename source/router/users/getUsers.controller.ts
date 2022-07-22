@@ -5,7 +5,7 @@ import { User } from '@prisma/client';
 import { PayloadReply, FastifyRequest } from 'fastify';
 
 export default function (request: FastifyRequest<{ Querystring: PageQuery; }>, reply: PayloadReply): void {
-	prisma.user.findMany(Object.assign({ select: {
+	prisma['user'].findMany(Object.assign({ select: {
 		id: true,
 		name: true,
 		permission: true,

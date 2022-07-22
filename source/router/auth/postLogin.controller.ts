@@ -5,7 +5,7 @@ import { prisma } from '@library/database';
 import { User } from '@prisma/client';
 
 export default function (request: FastifyRequest<{ Body: Pick<User, 'id' | 'password'>; }>, reply: PayloadReply): void {
-	prisma.user.findFirst({
+	prisma['user'].findFirst({
 		select: {
 			id: true,
 			password: true,

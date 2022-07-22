@@ -5,7 +5,7 @@ import { User } from '@prisma/client';
 import { PayloadReply, FastifyRequest } from 'fastify';
 
 export default function (request: FastifyRequest<{ Body: Pick<User, 'name' | 'password' | 'email'>; }>, reply: PayloadReply): void {
-	prisma.user.findMany({
+	prisma['user'].findMany({
 		select: {
 			name: true,
 			email: true
@@ -29,7 +29,7 @@ export default function (request: FastifyRequest<{ Body: Pick<User, 'name' | 'pa
 			.then(function (encryptedPassword: string): void {
 				const verificationKey: string = getSha512EncryptedText(request['body']['name'] + '+' + currentTime.getTime());
 
-				prisma.user.create({
+				prisma['user'].create({
 					select: { id: true },
 					data: {
 						name: request['body']['name'],

@@ -3,7 +3,7 @@ import { User } from '@prisma/client';
 import { PayloadReply, FastifyRequest } from 'fastify';
 
 export default function (request: FastifyRequest<{ Params: Pick<User, 'id'> }>, reply: PayloadReply): void {
-	prisma.user.findFirst({
+	prisma['user'].findFirst({
 		select: {
 			id: true,
 			name: true,
